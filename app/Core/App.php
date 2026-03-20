@@ -16,13 +16,13 @@ class App {
         $url = $this->getUrl();
 
         // Look in controllers for first value
-        if ($url && file_exists('../app/Controllers/' . ucwords($url[0]) . '.php')) {
+        if ($url && file_exists(APPROOT . '/Controllers/' . ucwords($url[0]) . '.php')) {
             $this->currentController = ucwords($url[0]);
             unset($url[0]);
         }
 
         // Require the controller
-        require_once '../app/Controllers/' . $this->currentController . '.php';
+        require_once APPROOT . '/Controllers/' . $this->currentController . '.php';
         
         // Instantiate controller class
         $controllerClass = "\\App\\Controllers\\" . $this->currentController;

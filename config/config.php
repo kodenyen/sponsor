@@ -7,7 +7,7 @@ define('DB_PASS', '');
 define('DB_NAME', 'sponsor');
 
 // App Configuration
-define('APPROOT', dirname(dirname(__FILE__)));
+define('APPROOT', dirname(dirname(__FILE__)) . '/App');
 define('URLROOT', 'http://localhost/sponsor');
 define('SITENAME', 'IOI Scholarship System');
 
