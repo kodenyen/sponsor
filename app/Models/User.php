@@ -2,77 +2,40 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Core\Database;
 
-class User extends Authenticatable
-{
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+class User {
+    private $db;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'role',
-    ];
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+    public function __construct() {
+        $this->db = new Database();
     }
 
-    public function studentProfile(): HasOne
-    {
-        return $this->hasOne(StudentProfile::class);
+    // Find user by email
+    public function findUserByEmail($email) {
+        $this->db->query('SELECT * FROM users WHERE email = :email');
+        $this->db->bind(':email', $email);
+        return $this->db->single();
     }
 
-    public function assignedStudents(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'sponsor_student_assignments', 'sponsor_id', 'student_id');
+    // Login User
+    public function login($email, $password) {
+        $row = $this->findUserByEmail($email);
+        if ($row) {
+            $hashed_password = $row->password;
+            if (password_verify($password, $hashed_password)) {
+                return $row;
+            }
+        }
+        return false;
     }
 
-    public function assignedSponsors(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'sponsor_student_assignments', 'student_id', 'sponsor_id');
-    }
-
-    public function sentMessages(): HasMany
-    {
-        return $this->hasMany(Message::class, 'sender_id');
-    }
-
-    public function receivedMessages(): HasMany
-    {
-        return $this->hasMany(Message::class, 'receiver_id');
+    // Get User by Token
+    public function getUserByToken($token) {
+        $this->db->query('SELECT u.* FROM users u 
+                          JOIN sponsor_tokens st ON u.id = st.sponsor_id 
+                          WHERE st.token = :token AND (st.expires_at IS NULL OR st.expires_at > CURRENT_TIMESTAMP)');
+        $this->db->bind(':token', $token);
+        return $this->db->single();
     }
 }
