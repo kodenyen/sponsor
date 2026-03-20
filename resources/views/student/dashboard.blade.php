@@ -12,7 +12,7 @@
                 @endif
                 <div class="card-body text-center">
                     @if($profile && $profile->profile_photo)
-                        <img src="{{ asset('storage/' . $profile->profile_photo) }}" class="rounded-circle mb-3" width="100" height="100" alt="Profile">
+                        <img src="{{ asset('storage/' . $profile->profile_photo) }}" class="rounded-circle mb-3" width="100" height="100" alt="Profile" style="object-fit: cover;">
                     @else
                         <div class="rounded-circle bg-secondary text-white d-inline-flex justify-content-center align-items-center mb-3" style="width: 100px; height: 100px; font-size: 2rem;">
                             {{ substr(auth()->user()->name, 0, 1) }}
@@ -20,6 +20,7 @@
                     @endif
                     <h4 class="card-title">{{ auth()->user()->name }} {{ $profile->surname ?? '' }}</h4>
                     <p class="card-text text-muted">{{ $profile->class ?? 'Class not set' }} | Age: {{ $profile->age ?? 'N/A' }}</p>
+                    <a href="{{ route('student.profile.edit') }}" class="btn btn-sm btn-outline-primary">Edit Profile</a>
                 </div>
             </div>
         </div>

@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\SponsorToken;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NewMessagePending;
+use App\Models\User;
+use App\Models\Message;
 
 class SponsorController extends Controller
 {
@@ -44,13 +48,19 @@ class SponsorController extends Controller
             'content' => 'required|string',
         ]);
 
-        \App\Models\Message::create([
+        $message = Message::create([
             'sender_id' => Auth::id(),
             'receiver_id' => $request->student_id,
             'content' => $request->content,
             'status' => 'pending',
             'type' => 'sponsor_to_student',
         ]);
+
+        // Notify Admins
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            Mail::to($admin->email)->send(new NewMessagePending($message));
+        }
 
         return back()->with('success', 'Message sent successfully. It is pending admin approval.');
     }
